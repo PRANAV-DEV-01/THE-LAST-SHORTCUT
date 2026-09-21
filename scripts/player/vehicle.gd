@@ -1,3 +1,4 @@
+## Arcade delivery vehicle with damage, camera, and screen shake.
 extends CharacterBody3D
 
 ## Arcade vehicle tuning values.
@@ -10,6 +11,7 @@ extends CharacterBody3D
 @export var camera_distance := 6.0
 @export var camera_height := 3.0
 @export var camera_smoothing := 5.0
+@export var screen_shake_intensity := 0.3
 
 const FLOOR_Y := 0.5
 
@@ -18,10 +20,10 @@ var _speed := 0.0
 var _steer_input := 0.0
 var health := 100.0
 var damage := 0.0
+var _shake_offset := Vector2.ZERO
 
 func _ready() -> void:
 	add_to_group("vehicle")
-
 	var box_mesh := BoxMesh.new()
 	box_mesh.size = Vector3(1.6, 0.6, 3.0)
 	var visual := MeshInstance3D.new()
@@ -64,6 +66,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 	_update_camera(delta)
+	_update_screen_shake(delta)
 
 func _update_camera(delta: float) -> void:
 	if _cam == null:
@@ -71,6 +74,22 @@ func _update_camera(delta: float) -> void:
 	var target_pos := global_position + Vector3(0, camera_height, -camera_distance)
 	_cam.global_position = _cam.global_position.lerp(target_pos, camera_smoothing * delta)
 	_cam.look_at(global_position, Vector3.UP)
+
+func _update_screen_shake(delta: float) -> void:
+	if not _cam or not is_instance_valid(_cam):
+		return
+	var parent := get_parent()
+	if parent and parent.has_method("get_screenshake") and not parent.get_screenshake():
+		_cam.rotation = Vector3.ZERO
+		return
+	if abs(_speed) > 0.1:
+		_shake_offset = Vector2(
+			randf_range(-1.0, 1.0) * screen_shake_intensity * abs(_speed) / 10.0,
+			randf_range(-1.0, 1.0) * screen_shake_intensity * abs(_speed) / 10.0
+		)
+	else:
+		_shake_offset = _shake_offset.lerp(Vector2.ZERO, 0.2)
+	_cam.rotation_degrees = Vector3(_shake_offset.y, 0, _shake_offset.x)
 
 func apply_damage(amount: float) -> void:
 	health = maxf(health - amount, 0.0)
@@ -87,3 +106,4 @@ func reset() -> void:
 	velocity = Vector3.ZERO
 	health = 100.0
 	damage = 0.0
+	_shake_offset = Vector2.ZERO

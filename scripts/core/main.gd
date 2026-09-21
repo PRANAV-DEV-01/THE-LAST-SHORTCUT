@@ -1,4 +1,4 @@
-## Main controller: delivery loop, repair, scoring, results, best score.
+## Main controller: delivery loop, repair, scoring, results, save, screen shake.
 extends Node3D
 
 const DELIVERY_TIME_LIMIT := 90.0
@@ -6,23 +6,28 @@ const REPAIR_TIME_PENALTY := 8.0
 
 @onready var _district := $District as Node3D
 @onready var _vehicle: CharacterBody3D = $District/Vehicle as CharacterBody3D
+@onready var _save_manager := $SaveManager as SaveManager
 
 var _timer := Timer.new()
 var _time_remaining := DELIVERY_TIME_LIMIT
 var _state := 0
-var _best_score := 0
-var _best_time := 0.0
 var _elapsed_time := 0.0
-var _results_label := Label.new()
+var _screenshake := true
 
 enum State { IDLE = 0, RUNNING = 1, SUCCESS = 2, FAILURE = 3 }
 
 func _ready() -> void:
+	_setup_save()
 	_setup_results()
 	_setup_timer()
 	_setup_signals()
 	_state = State.IDLE
 	_start_delivery()
+
+func _setup_save() -> void:
+	if _save_manager and is_instance_valid(_save_manager):
+		_screenshake = _save_manager.is_screenshake_on()
+		print("SAVE: bestscore=", _save_manager.get_best_score(), " besttime=", _save_manager.get_best_time(), " screenshake=", _screenshake)
 
 func _setup_results() -> void:
 	_results_label.name = "ResultsLabel"
@@ -67,7 +72,7 @@ func _succeed() -> void:
 	_state = State.SUCCESS
 	_timer.stop()
 	var score := _calculate_score()
-	_update_best_score(score)
+	_save_best(score)
 	_update_results_label()
 	print("DELIVERY_SUCCESS score=", score, " time=", _elapsed_time)
 
@@ -92,11 +97,18 @@ func _get_vehicle_health() -> float:
 		return _vehicle.health
 	return 100.0
 
-func _update_best_score(score: int) -> void:
-	if score > _best_score:
-		_best_score = score
-	if _best_time == 0.0 or _elapsed_time < _best_time:
-		_best_time = _elapsed_time
+func _save_best(score: int) -> void:
+	if _save_manager and is_instance_valid(_save_manager):
+		_save_manager.set_best_score(score)
+		_save_manager.set_best_time(_elapsed_time)
+		_save_manager.save_data()
+		print("SAVE: saved bestscore=", _save_manager.get_best_score(), " besttime=", _save_manager.get_best_time())
+
+func _toggle_screenshake() -> void:
+	if _save_manager and is_instance_valid(_save_manager):
+		_save_manager.toggle_screenshake()
+		_screenshake = _save_manager.is_screenshake_on()
+		print("SCREENSHAKE ", _screenshake)
 
 func _restart() -> void:
 	_state = State.IDLE
@@ -123,10 +135,13 @@ func _update_results_label() -> void:
 			_results_label.visible = true
 		State.SUCCESS:
 			var score := _calculate_score()
-			_results_label.text = "SUCCESS! Score: " + str(score) + " Best: " + str(_best_score)
+			var best := 0
+			if _save_manager and is_instance_valid(_save_manager):
+				best = _save_manager.get_best_score()
+			_results_label.text = "SUCCESS! Score: " + str(score) + " Best: " + str(best)
 			_results_label.visible = true
 		State.FAILURE:
-			_results_label.text = "FAILED - Time up!"
+			_results_label.text = "FAILED - Time is up!"
 			_results_label.visible = true
 
 func get_state() -> int:
@@ -144,10 +159,17 @@ func get_score() -> int:
 	return 0
 
 func get_best_score() -> int:
-	return _best_score
+	if _save_manager and is_instance_valid(_save_manager):
+		return _save_manager.get_best_score()
+	return 0
 
 func get_best_time() -> float:
-	return _best_time
+	if _save_manager and is_instance_valid(_save_manager):
+		return _save_manager.get_best_time()
+	return 0.0
+
+func get_screenshake() -> bool:
+	return _screenshake
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("restart"):

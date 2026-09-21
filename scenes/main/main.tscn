@@ -1,10 +1,13 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="PackedScene" id="1_district" path="res://scenes/levels/district_full.tscn"]
+[ext_resource type="PackedScene" id="2_save" path="res://scenes/save/save_manager.tscn"]
 
 [node name="Main" type="Node3D"]
 
 [node name="District" parent="." instance=ExtResource("1_district")]
+
+[node name="SaveManager" parent="." instance=ExtResource("2_save")]
 
 [node name="DirectionalLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.707107, -0.499999, 0.499999, 0, 0.866025, 0.5, -0.707107, 0, 0.866025, 0, 0, 0)

@@ -1,12 +1,10 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" id="1_1a2b3c" path="res://scripts/core/main.gd"]
-[ext_resource type="PackedScene" id="2_vehicle" path="res://scenes/player/vehicle.tscn"]
+[ext_resource type="PackedScene" id="1_district" path="res://scenes/levels/district_full.tscn"]
 
 [node name="Main" type="Node3D"]
-script = ExtResource("1_1a2b3c")
 
-[node name="Vehicle" parent="." instance=ExtResource("2_vehicle")]
+[node name="District" parent="." instance=ExtResource("1_district")]
 
 [node name="DirectionalLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.707107, -0.499999, 0.499999, 0, 0.866025, 0.5, -0.707107, 0, 0.866025, 0, 0, 0)

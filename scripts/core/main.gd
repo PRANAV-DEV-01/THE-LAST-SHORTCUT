@@ -3,16 +3,19 @@ extends Node3D
 
 const DELIVERY_TIME_LIMIT := 90.0
 const REPAIR_TIME_PENALTY := 8.0
+const TIMER_WARNING_THRESHOLD := 15.0
 
 @onready var _district := $District as Node3D
 @onready var _vehicle: CharacterBody3D = $District/Vehicle as CharacterBody3D
 @onready var _save_manager := $SaveManager as SaveManager
+@onready var _results_label := $ResultsLabel as Label
 
 var _timer := Timer.new()
 var _time_remaining := DELIVERY_TIME_LIMIT
 var _state := 0
 var _elapsed_time := 0.0
 var _screenshake := true
+var _timer_warning := false
 
 enum State { IDLE = 0, RUNNING = 1, SUCCESS = 2, FAILURE = 3 }
 
@@ -50,12 +53,15 @@ func _setup_signals() -> void:
 		_district.delivery_complete.connect(_on_delivery_complete)
 	if _district and _district.has_signal("vehicle_repaired"):
 		_district.vehicle_repaired.connect(_on_vehicle_repaired)
+	if _district and _district.has_signal("barrier_hit"):
+		_district.barrier_hit.connect(_on_barrier_hit)
 
 func _on_timer_timeout() -> void:
 	if _state != State.RUNNING:
 		return
 	_time_remaining -= 1.0
 	_elapsed_time += 1.0
+	_update_timer_warning()
 	_update_results_label()
 	if _time_remaining <= 0.0:
 		_fail()
@@ -74,17 +80,27 @@ func _succeed() -> void:
 	var score := _calculate_score()
 	_save_best(score)
 	_update_results_label()
+	if _vehicle and is_instance_valid(_vehicle):
+		_vehicle.trigger_success_feedback()
 	print("DELIVERY_SUCCESS score=", score, " time=", _elapsed_time)
 
 func _fail() -> void:
 	_state = State.FAILURE
 	_timer.stop()
 	_update_results_label()
+	if _vehicle and is_instance_valid(_vehicle):
+		_vehicle.trigger_failure_feedback()
 	print("DELIVERY_FAILED time_up=true")
 
 func _on_vehicle_repaired(vehicle: CharacterBody3D) -> void:
 	_time_remaining = maxf(_time_remaining - REPAIR_TIME_PENALTY, 0.0)
 	print("REPAIR_TIME_PENALTY penalty=", REPAIR_TIME_PENALTY, " remaining=", _time_remaining)
+
+func _on_barrier_hit(vehicle: CharacterBody3D, damage: float) -> void:
+	if vehicle and is_instance_valid(vehicle):
+		vehicle.apply_damage(damage)
+		vehicle.trigger_impact(damage * 0.05)
+	print("BARRIER_HIT damage=", damage)
 
 func _calculate_score() -> int:
 	var time_bonus := int(maxf(_time_remaining, 0.0) * 10)
@@ -115,6 +131,7 @@ func _restart() -> void:
 	_time_remaining = DELIVERY_TIME_LIMIT
 	_elapsed_time = 0.0
 	_timer.stop()
+	_timer_warning = false
 	if _vehicle and is_instance_valid(_vehicle):
 		_vehicle.reset()
 	if _district and _district.has_method("reset"):
@@ -123,6 +140,9 @@ func _restart() -> void:
 	_start_delivery()
 	print("DELIVERY_RESTARTED")
 
+func _update_timer_warning() -> void:
+	_timer_warning = _time_remaining > 0.0 and _time_remaining <= TIMER_WARNING_THRESHOLD and _state == State.RUNNING
+
 func _update_results_label() -> void:
 	if not is_instance_valid(_results_label):
 		return
@@ -130,8 +150,15 @@ func _update_results_label() -> void:
 		State.IDLE:
 			_results_label.text = "DELIVERY STARTED"
 			_results_label.visible = true
+			_results_label.add_theme_color_override("font_color", Color.WHITE)
 		State.RUNNING:
-			_results_label.text = "Time: " + str(ceil(_time_remaining)) + "s"
+			var time_str := str(ceil(_time_remaining)) + "s"
+			if _timer_warning:
+				_results_label.text = "TIME: " + time_str + " - HURRY!"
+				_results_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.1))
+			else:
+				_results_label.text = "Time: " + time_str
+				_results_label.add_theme_color_override("font_color", Color.WHITE)
 			_results_label.visible = true
 		State.SUCCESS:
 			var score := _calculate_score()
@@ -139,9 +166,11 @@ func _update_results_label() -> void:
 			if _save_manager and is_instance_valid(_save_manager):
 				best = _save_manager.get_best_score()
 			_results_label.text = "SUCCESS! Score: " + str(score) + " Best: " + str(best)
+			_results_label.add_theme_color_override("font_color", Color(0.1, 0.9, 0.3))
 			_results_label.visible = true
 		State.FAILURE:
 			_results_label.text = "FAILED - Time is up!"
+			_results_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
 			_results_label.visible = true
 
 func get_state() -> int:

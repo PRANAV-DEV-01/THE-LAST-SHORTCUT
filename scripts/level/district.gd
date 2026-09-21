@@ -1,4 +1,4 @@
-## District blockout: depot, safe route, shortcut, barrier, repair, destination, collapse boundary.
+## District blockout with destructible barrier, repair station, and destination.
 extends Node3D
 
 @export var road_width := 4.0
@@ -8,11 +8,22 @@ extends Node3D
 @export var barrier_position := Vector3(0, 0.5, -5.0)
 @export var repair_position := Vector3(-6.0, 0.5, 5.0)
 @export var destination_position := Vector3(0.0, 0.5, -14.0)
+@export var barrier_damage := 30.0
+@export var max_vehicle_health := 100.0
+
+enum BarrierState { INTACT, HIT, BROKEN }
+
+var barrier_state := BarrierState.INTACT
+var vehicle_health := 100.0
+var vehicle_damage := 0.0
+var shortcut_open := false
+var barrier_hit_time := 0.0
 
 var _floor := MeshInstance3D.new()
-var _shortcut_floor := MeshInstance3D.new()
 var _safe_floor := MeshInstance3D.new()
+var _shortcut_floor := MeshInstance3D.new()
 var _barrier_instance: MeshInstance3D
+var _barrier_area: Area3D
 var _repair_zone: Area3D
 var _destination_zone: Area3D
 var _depot: MeshInstance3D
@@ -21,6 +32,7 @@ var _building_right := MeshInstance3D.new()
 var _collapse_boundary := MeshInstance3D.new()
 var _marker_shortcut := MeshInstance3D.new()
 var _marker_destination := MeshInstance3D.new()
+var _vehicle_ref: CharacterBody3D
 
 func _ready() -> void:
 	_build_floor()
@@ -31,6 +43,13 @@ func _ready() -> void:
 	_build_depot()
 	_build_route_markers()
 	_build_collapse_boundary()
+	_vehicle_ref = _find_vehicle()
+
+func _find_vehicle() -> CharacterBody3D:
+	for n in get_tree().get_nodes_in_group("vehicle"):
+		if n is CharacterBody3D:
+			return n as CharacterBody3D
+	return null
 
 func _build_floor() -> void:
 	var road_mat := StandardMaterial3D.new()
@@ -91,7 +110,45 @@ func _build_barrier() -> void:
 	_barrier_instance.mesh = barrier_mesh
 	_barrier_instance.material_override = barrier_mat
 	_barrier_instance.position = barrier_position
+	_barrier_instance.add_to_group("barrier")
 	add_child(_barrier_instance)
+
+	_barrier_area = Area3D.new()
+	var area_shape := CollisionShape3D.new()
+	area_shape.shape = BoxShape3D.new()
+	area_shape.shape.size = Vector3(road_width + 1.0, 2.5, 1.5)
+	_barrier_area.add_child(area_shape)
+	_barrier_area.position = barrier_position
+	_barrier_area.body_entered.connect(_on_barrier_body_entered)
+	_barrier_area.add_to_group("barrier_area")
+	add_child(_barrier_area)
+
+func _on_barrier_body_entered(body: Node3D) -> void:
+	if barrier_state == BarrierState.INTACT and body is CharacterBody3D:
+		_apply_barrier_impact(body as CharacterBody3D)
+
+func _apply_barrier_impact(vehicle: CharacterBody3D) -> void:
+	barrier_state = BarrierState.HIT
+	barrier_hit_time = Time.get_ticks_msec()
+
+	if vehicle_health > 0:
+		vehicle_damage += barrier_damage
+		vehicle_health = maxf(vehicle_health - barrier_damage, 0.0)
+
+	if vehicle_health <= 0:
+		_vehicle_destroyed()
+
+	shortcut_open = true
+	_remove_barrier_visual()
+
+	print("BARRIER_HIT: damage=", vehicle_damage, " health=", vehicle_health, " shortcut_open=", shortcut_open)
+
+func _vehicle_destroyed() -> void:
+	print("VEHICLE_DESTROYED")
+
+func _remove_barrier_visual() -> void:
+	if _barrier_instance and is_instance_valid(_barrier_instance):
+		_barrier_instance.queue_free()
 
 func _build_repair_station() -> void:
 	var repair_mat := StandardMaterial3D.new()
@@ -112,7 +169,17 @@ func _build_repair_station() -> void:
 	repair_visual.position = Vector3(0, 1.5, 0)
 	_repair_zone.add_child(repair_visual)
 	_repair_zone.position = repair_position
+	_repair_zone.body_entered.connect(_on_repair_body_entered)
 	add_child(_repair_zone)
+
+func _on_repair_body_entered(body: Node3D) -> void:
+	if body is CharacterBody3D and shortcut_open:
+		_repair_vehicle(body as CharacterBody3D)
+
+func _repair_vehicle(vehicle: CharacterBody3D) -> void:
+	vehicle_health = max_vehicle_health
+	vehicle_damage = 0.0
+	print("REPAIRED: health=", vehicle_health)
 
 func _build_destination() -> void:
 	var dest_mat := StandardMaterial3D.new()
@@ -133,7 +200,15 @@ func _build_destination() -> void:
 	dest_visual.position = Vector3(0, 2.0, 0)
 	_destination_zone.add_child(dest_visual)
 	_destination_zone.position = destination_position
+	_destination_zone.body_entered.connect(_on_destination_body_entered)
 	add_child(_destination_zone)
+
+func _on_destination_body_entered(body: Node3D) -> void:
+	if body is CharacterBody3D:
+		_delivery_complete()
+
+func _delivery_complete() -> void:
+	print("DELIVERY_COMPLETE")
 
 func _build_depot() -> void:
 	var depot_mat := StandardMaterial3D.new()
@@ -174,21 +249,22 @@ func _build_collapse_boundary() -> void:
 	_collapse_boundary.position = Vector3(0, block_height / 2.0, -2.0)
 	add_child(_collapse_boundary)
 
-func get_barrier() -> MeshInstance3D:
-	return _barrier_instance
+func get_barrier_state() -> int:
+	return barrier_state
 
 func is_shortcut_open() -> bool:
-	return _barrier_instance == null or not is_instance_valid(_barrier_instance)
+	return shortcut_open
 
-func remove_barrier() -> void:
-	if _barrier_instance and is_instance_valid(_barrier_instance):
-		_barrier_instance.queue_free()
+func get_vehicle_health() -> float:
+	return vehicle_health
 
-func repair_vehicle() -> void:
-	pass
+func get_vehicle_damage() -> float:
+	return vehicle_damage
 
-func get_destination_zone() -> Area3D:
-	return _destination_zone
-
-func get_repair_zone() -> Area3D:
-	return _repair_zone
+func reset() -> void:
+	barrier_state = BarrierState.INTACT
+	vehicle_health = max_vehicle_health
+	vehicle_damage = 0.0
+	shortcut_open = false
+	barrier_hit_time = 0.0
+	_build_barrier()

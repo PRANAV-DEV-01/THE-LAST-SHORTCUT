@@ -16,8 +16,12 @@ const FLOOR_Y := 0.5
 var _cam: Camera3D
 var _speed := 0.0
 var _steer_input := 0.0
+var health := 100.0
+var damage := 0.0
 
 func _ready() -> void:
+	add_to_group("vehicle")
+
 	var box_mesh := BoxMesh.new()
 	box_mesh.size = Vector3(1.6, 0.6, 3.0)
 	var visual := MeshInstance3D.new()
@@ -68,8 +72,18 @@ func _update_camera(delta: float) -> void:
 	_cam.global_position = _cam.global_position.lerp(target_pos, camera_smoothing * delta)
 	_cam.look_at(global_position, Vector3.UP)
 
+func apply_damage(amount: float) -> void:
+	health = maxf(health - amount, 0.0)
+	damage += amount
+
+func repair() -> void:
+	health = 100.0
+	damage = 0.0
+
 func reset() -> void:
 	position = Vector3(0, FLOOR_Y, 0)
 	rotation = Vector3.ZERO
 	_speed = 0.0
 	velocity = Vector3.ZERO
+	health = 100.0
+	damage = 0.0

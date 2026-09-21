@@ -1,0 +1,6 @@
+[gd_scene load_steps=1 format=3]
+
+[ext_resource type="Script" id="1_veh01" path="res://scripts/player/vehicle.gd"]
+
+[node name="Vehicle" type="CharacterBody3D"]
+script = ExtResource("1_veh01")

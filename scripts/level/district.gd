@@ -1,10 +1,6 @@
 ## District blockout with destructible barrier, repair station, and destination.
 extends Node3D
 
-signal delivery_complete(vehicle: CharacterBody3D)
-signal vehicle_repaired(vehicle: CharacterBody3D)
-signal barrier_hit(vehicle: CharacterBody3D, damage: float)
-
 @export var road_width := 4.0
 @export var road_length := 30.0
 @export var block_width := 16.0
@@ -14,14 +10,20 @@ signal barrier_hit(vehicle: CharacterBody3D, damage: float)
 @export var destination_position := Vector3(0.0, 0.5, -14.0)
 @export var barrier_damage := 30.0
 @export var max_vehicle_health := 100.0
+@export var repair_time_cost := 8.0
 
-enum BarrierState { INTACT, HIT, BROKEN }
+enum BarrierState { INTACT = 0, HIT = 1, BROKEN = 2 }
+
+signal delivery_complete(vehicle: CharacterBody3D)
+signal vehicle_repaired(vehicle: CharacterBody3D)
+signal barrier_hit(vehicle: CharacterBody3D, damage: float)
 
 var barrier_state := BarrierState.INTACT
 var vehicle_health := 100.0
 var vehicle_damage := 0.0
 var shortcut_open := false
 var barrier_hit_time := 0.0
+var _vehicle_ref: CharacterBody3D
 
 var _floor := MeshInstance3D.new()
 var _safe_floor := MeshInstance3D.new()
@@ -36,7 +38,6 @@ var _building_right := MeshInstance3D.new()
 var _collapse_boundary := MeshInstance3D.new()
 var _marker_shortcut := MeshInstance3D.new()
 var _marker_destination := MeshInstance3D.new()
-var _vehicle_ref: CharacterBody3D
 
 func _ready() -> void:
 	_build_floor()
@@ -47,21 +48,12 @@ func _ready() -> void:
 	_build_depot()
 	_build_route_markers()
 	_build_collapse_boundary()
-	_vehicle_ref = _find_vehicle()
-
-func _find_vehicle() -> CharacterBody3D:
-	for n in get_tree().get_nodes_in_group("vehicle"):
-		if n is CharacterBody3D:
-			return n as CharacterBody3D
-	return null
 
 func _build_floor() -> void:
 	var road_mat := StandardMaterial3D.new()
 	road_mat.albedo_color = Color(0.25, 0.25, 0.28, 1)
-
 	var safe_mat := StandardMaterial3D.new()
 	safe_mat.albedo_color = Color(0.2, 0.5, 0.25, 0.4)
-
 	var shortcut_mat := StandardMaterial3D.new()
 	shortcut_mat.albedo_color = Color(0.5, 0.4, 0.15, 0.4)
 
@@ -183,7 +175,7 @@ func _repair_vehicle(vehicle: CharacterBody3D) -> void:
 	vehicle_health = max_vehicle_health
 	vehicle_damage = 0.0
 	vehicle_repaired.emit(vehicle)
-	print("REPAIRED: health=", vehicle_health)
+	print("REPAIRED: health=", vehicle_health, " time_cost=", repair_time_cost)
 
 func _build_destination() -> void:
 	var dest_mat := StandardMaterial3D.new()
@@ -210,9 +202,6 @@ func _build_destination() -> void:
 func _on_destination_body_entered(body: Node3D) -> void:
 	if body is CharacterBody3D:
 		delivery_complete.emit(body as CharacterBody3D)
-
-func _delivery_complete() -> void:
-	print("DELIVERY_COMPLETE")
 
 func _build_depot() -> void:
 	var depot_mat := StandardMaterial3D.new()

@@ -7,16 +7,23 @@
 - [x] Set Android as the primary target
 - [x] Set Desktop as the secondary target
 - [x] Create the `agent/milestone-0-setup` branch
-- [ ] Review the five documentation files
-- [ ] Verify the branch diff
-- [ ] Commit after review
+- [x] Review the five documentation files
+- [x] Verify the branch diff
+- [x] Commit after review
+
+## Milestone 1 — Minimal project validation
+
+- [x] Create the minimal `project.godot`
+- [x] Configure the Mobile renderer
+- [x] Add the minimal main scene
+- [x] Add a floor, camera, and directional light
+- [ ] Open the project in Godot 4.0
+- [ ] Run the validation scene
+- [ ] Test Android export on the phone
+- [ ] Measure performance on the phone
 
 ## Later Milestones
 
-- [ ] Create the minimal Godot project
-- [ ] Validate project opening in Godot 4.0
 - [ ] Add gray-box gameplay systems
 - [ ] Add named input actions
 - [ ] Add versioned local save data
-- [ ] Test Android export on the phone
-- [ ] Measure performance on the phone

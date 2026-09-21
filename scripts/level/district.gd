@@ -1,6 +1,10 @@
 ## District blockout with destructible barrier, repair station, and destination.
 extends Node3D
 
+signal delivery_complete(vehicle: CharacterBody3D)
+signal vehicle_repaired(vehicle: CharacterBody3D)
+signal barrier_hit(vehicle: CharacterBody3D, damage: float)
+
 @export var road_width := 4.0
 @export var road_length := 30.0
 @export var block_width := 16.0
@@ -140,8 +144,7 @@ func _apply_barrier_impact(vehicle: CharacterBody3D) -> void:
 
 	shortcut_open = true
 	_remove_barrier_visual()
-
-	print("BARRIER_HIT: damage=", vehicle_damage, " health=", vehicle_health, " shortcut_open=", shortcut_open)
+	barrier_hit.emit(vehicle, barrier_damage)
 
 func _vehicle_destroyed() -> void:
 	print("VEHICLE_DESTROYED")
@@ -179,6 +182,7 @@ func _on_repair_body_entered(body: Node3D) -> void:
 func _repair_vehicle(vehicle: CharacterBody3D) -> void:
 	vehicle_health = max_vehicle_health
 	vehicle_damage = 0.0
+	vehicle_repaired.emit(vehicle)
 	print("REPAIRED: health=", vehicle_health)
 
 func _build_destination() -> void:
@@ -205,7 +209,7 @@ func _build_destination() -> void:
 
 func _on_destination_body_entered(body: Node3D) -> void:
 	if body is CharacterBody3D:
-		_delivery_complete()
+		delivery_complete.emit(body as CharacterBody3D)
 
 func _delivery_complete() -> void:
 	print("DELIVERY_COMPLETE")

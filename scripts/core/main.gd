@@ -8,7 +8,6 @@ const TIMER_WARNING_THRESHOLD := 15.0
 @onready var _district := $District as Node3D
 @onready var _vehicle: CharacterBody3D = $District/Vehicle as CharacterBody3D
 @onready var _save_manager := $SaveManager as SaveManager
-@onready var _results_label := $ResultsLabel as Label
 
 var _timer := Timer.new()
 var _time_remaining := DELIVERY_TIME_LIMIT
@@ -16,6 +15,8 @@ var _state := 0
 var _elapsed_time := 0.0
 var _screenshake := true
 var _timer_warning := false
+
+var _results_label := Label.new()
 
 enum State { IDLE = 0, RUNNING = 1, SUCCESS = 2, FAILURE = 3 }
 
@@ -201,8 +202,6 @@ func get_screenshake() -> bool:
 	return _screenshake
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("restart"):
-		_restart()
 	if event.is_action_pressed("pause") and _state == State.RUNNING:
 		get_tree().paused = not get_tree().paused
 

@@ -31,13 +31,13 @@ The player drives a delivery vehicle through a compact 3D district. The district
 
 ## Requirements
 
-- Godot 4.3+
+- Godot 4.3.stable.official.77dcf97d8
 - GL Compatibility renderer
 - No external dependencies
 
 ## Run
 
-1. Open Godot 4.3+
+1. Open Godot 4.3.stable.official.77dcf97d8
 2. Import project.godot
 3. Press F5 to play
 

@@ -23,7 +23,6 @@ var vehicle_health := 100.0
 var vehicle_damage := 0.0
 var shortcut_open := false
 var barrier_hit_time := 0.0
-var _vehicle_ref: CharacterBody3D
 
 var _floor := MeshInstance3D.new()
 var _safe_floor := MeshInstance3D.new()

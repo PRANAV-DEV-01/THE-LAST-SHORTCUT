@@ -19,8 +19,8 @@ Vertical slice: 3D gray-box delivery driving game.
 | Milestone 6: Repair and scoring | VERIFIED |
 | Milestone 7: Local save and accessibility | VERIFIED |
 | Milestone 8: Gray-box game feel | VERIFIED |
-| Milestone 9: QA documentation | IN PROGRESS |
-| Milestone 10: Verified packaging | NOT TESTED |
+| Milestone 9: QA documentation | VERIFIED |
+| Milestone 10: Verified packaging | VERIFIED |
 
 ### Gameplay Features Status
 

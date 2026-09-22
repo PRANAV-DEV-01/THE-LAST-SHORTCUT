@@ -18,8 +18,8 @@
 
 | Platform | Status |
 |----------|--------|
-| Android (primary) | NOT TESTED - no Android SDK or device available |
-| Desktop (secondary) | NOT TESTED - no .NET/Mono build tools available |
+| Android (primary) | NOT TESTED - no Android SDK, ADB, Java, Gradle, or device available |
+| Desktop (secondary) | NOT TESTED - no desktop export toolchain verified |
 
 ### Project Configuration
 
@@ -45,6 +45,19 @@
 | steer_right | Key.D (16777235) | Key.RIGHT (16777234) |
 | restart | Key.R (82) | - |
 | pause | Key.ESCAPE (4194305) | - |
+
+### Validation Status
+
+| Check | Status |
+|-------|--------|
+| Structural validation | VERIFIED |
+| Code-review audit | VERIFIED |
+| Interactive gameplay | NOT TESTED |
+| Godot graphical editor | NOT TESTED |
+| Android export | NOT TESTED |
+| Desktop export | NOT TESTED |
+| Performance | NOT TESTED |
+| Release readiness | NOT READY |
 
 ### Dependencies
 

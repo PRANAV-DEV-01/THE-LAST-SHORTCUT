@@ -6,10 +6,11 @@
 
 ### Next Steps
 
-- [ ] Milestone 9: Complete QA documentation (in progress)
-- [ ] Milestone 10: Package verified prototype
+- [ ] Milestone 9: Complete QA documentation (in progress; interactive results pending)
+- [ ] Run Godot graphical editor launch and interactive gameplay QA
+- [ ] Milestone 10: Package verified prototype (blocked on interactive QA)
 - [ ] Android export test (requires Android SDK + device)
-- [ ] Desktop export test (requires .NET/Mono build tools)
+- [ ] Desktop export test (requires export toolchain)
 - [ ] Playtest all vehicle movement scenarios
 - [ ] Playtest barrier destruction and shortcut
 - [ ] Playtest repair station time penalty
@@ -22,6 +23,6 @@
 
 ### Known Issues
 
-- Godot headless mode produces mesh rendering warnings (non-blocking)
-- No Android or Desktop build tools available in environment
-- Interactive gameplay not testable in headless mode
+- Godot headless mode produces dummy-renderer mesh warnings (non-blocking)
+- No Android SDK/ADB/Java/Gradle or verified desktop export toolchain available
+- Interactive gameplay and graphical editor launch are not testable in the current headless environment

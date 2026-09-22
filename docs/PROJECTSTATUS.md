@@ -19,8 +19,21 @@ Vertical slice: 3D gray-box delivery driving game.
 | Milestone 6: Repair and scoring | VERIFIED |
 | Milestone 7: Local save and accessibility | VERIFIED |
 | Milestone 8: Gray-box game feel | VERIFIED |
-| Milestone 9: QA documentation | VERIFIED |
-| Milestone 10: Verified packaging | VERIFIED |
+| Milestone 9: QA documentation | IN PROGRESS |
+| Milestone 10: Verified packaging | NOT TESTED |
+
+### Current Readiness
+
+| Area | Status |
+|------|--------|
+| Structural validation | VERIFIED |
+| Code-review audit | VERIFIED |
+| Interactive gameplay | NOT TESTED |
+| Godot graphical editor | NOT TESTED |
+| Android export | NOT TESTED |
+| Desktop export | NOT TESTED |
+| Performance | NOT TESTED |
+| Release readiness | NOT READY |
 
 ### Gameplay Features Status
 
@@ -64,27 +77,24 @@ Vertical slice: 3D gray-box delivery driving game.
 THE-LAST-SHORTCUT/
 ├── project.godot
 ├── icon.svg
+├── README.md
 ├── scenes/
 │   ├── main/main.tscn
 │   ├── player/vehicle.tscn
 │   ├── levels/district_full.tscn
-│   ├── save/save_manager.tscn
-│   └── levels/
+│   └── save/save_manager.tscn
 ├── scripts/
 │   ├── core/main.gd
 │   ├── player/vehicle.gd
 │   ├── level/district.gd
 │   └── save/save_manager.gd
 ├── assets/
-│   ├── materials/vehicle.tres
-│   ├── art/
-│   └── audio/
-├── docs/
-│   ├── PROJECTSTATUS.md
-│   ├── TECHSTACK.md
-│   ├── TODO.md
-│   ├── KNOWNLIMITATIONS.md
-│   └── TESTRESULTS.md
-├── tests/
-└── README.md
+│   └── materials/vehicle.tres
+└── docs/
+    ├── PROJECTSTATUS.md
+    ├── TECHSTACK.md
+    ├── TODO.md
+    ├── KNOWNLIMITATIONS.md
+    ├── TESTRESULTS.md
+    └── FINALREPORT.md
 ```

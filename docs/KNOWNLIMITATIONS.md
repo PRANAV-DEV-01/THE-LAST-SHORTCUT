@@ -9,9 +9,10 @@
 | Limitation | Impact | Workaround |
 |------------|--------|------------|
 | No Godot in PATH | Must use /tmp/opencode/godot_bin/ | PATH set in .bashrc |
-| No Android SDK | Cannot build APK | Deferred to Milestone 10 |
-| No Java/Gradle | Cannot build Android | Deferred to Milestone 10 |
-| No .NET/Mono | Cannot build desktop export | Deferred to Milestone 10 |
+| No graphical Godot session | Cannot test editor launch or interactive gameplay | Status remains NOT TESTED |
+| No Android SDK/ADB/Java/Gradle | Cannot build or test an APK | Deferred |
+| No desktop export toolchain verified | Cannot verify a desktop package | Deferred |
+| No performance measurement | Cannot assess mobile or desktop performance | Deferred |
 | Headless mode only | Cannot test interactive gameplay | Documented as NOT TESTED |
 | aarch64 architecture | x86_64 Godot binary non-functional | Use arm64 binary |
 
@@ -21,7 +22,7 @@
 |------------|--------|------------|
 | .tscn sub_resource parsing issues | Meshes created via script instead | Create resources in _ready() |
 | BoxMesh inline in .tscn fails | Vehicle visual created in code | MeshInstance3D created in script |
-| Headless mode mesh errors | Non-blocking warnings only | Does not affect gameplay logic |
+| Headless dummy-renderer warnings | Rendering diagnostics only; no gameplay conclusion | Graphical test required |
 | No interactive testing | All gameplay = NOT TESTED | Will test when environment allows |
 | No Android device | Cannot verify mobile performance | Will test when device available |
 

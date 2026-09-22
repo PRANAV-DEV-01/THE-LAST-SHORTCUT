@@ -14,7 +14,7 @@ agent/the-last-shortcut-3d
 30aa2ef Initial commit
 
 ### 4. Final commit
-61285f3 milestone 9: document vertical slice QA
+a1bdbf0 audit: runtime readiness fixes and version consistency
 
 ### 5. Actual Godot Version
 4.3.stable.official.77dcf97d8
@@ -22,28 +22,13 @@ agent/the-last-shortcut-3d
 ### 6. Renderer
 GL Compatibility (Mobile)
 
-### 7. Files Created
-- project.godot (2)
-- icon.svg (2)
-- scenes/main/main.tscn (2)
-- scripts/core/main.gd (2)
-- scenes/player/vehicle.tscn (2)
-- scripts/player/vehicle.gd (2)
-- assets/materials/vehicle.tres (2)
-- scenes/levels/district_full.tscn (2)
-- scripts/level/district.gd (2)
-- scenes/save/save_manager.tscn (2)
-- scripts/save/save_manager.gd (2)
-- docs/PROJECTSTATUS.md (2)
-- docs/TECHSTACK.md (2)
-- docs/TODO.md (2)
-- docs/KNOWNLIMITATIONS.md (2)
-- docs/TESTRESULTS.md (2)
+### 7. Current Tracked Files
+18 tracked files: `project.godot`, `icon.svg`, `README.md`, four scene files, four scripts, one material, and six documentation files.
 
-### 8. Files Modified
-None beyond staged file creations.
+### 8. Current Change
+Documentation-only status correction on `agent/the-last-shortcut-3d`; no gameplay, scene, or asset changes were made in this pass.
 
-### 9. Completed Gameplay
+### 9. Implemented Gameplay (Code-Reviewed, Not Interactively Tested)
 - One compact 3D district with depot, safe route, shortcut, barrier, repair station, destination, collapse boundary
 - One delivery vehicle with arcade movement
 - One package objective (delivery destination)
@@ -65,30 +50,34 @@ None beyond staged file creations.
 - No vehicle damage visual indicator (health is tracked, not displayed in HUD)
 
 ### 11. Tests Passed
-- Fresh launch: PASS (headless arm64, no parse errors)
-- Project opens: PASS (no parser errors, no missing resources)
-- Scene launches: PASS (exit code 0, no errors)
+- Headless project load: PASS (Godot 4.3.stable.official.77dcf97d8, exit code 0, no parser or missing-resource errors)
+- Headless main-scene startup: PASS (exit code 0; dummy-renderer mesh warnings remain)
+- Runtime readiness audit: PASS (code review)
 - Save missing file handling: VERIFIED (logs confirm "SAVE: no existing save file, using defaults")
 
 ### 12. Tests Failed
-None.
+None reported by the headless check. Interactive results are unavailable.
 
 ### 13. Tests Unavailable
-All interactive gameplay tests: NOT TESTED (headless mode only, no interactive session).
+- Interactive gameplay: NOT TESTED (no graphical Godot session)
+- Godot graphical editor launch: NOT TESTED
+- Android export and device testing: NOT TESTED
+- Desktop export: NOT TESTED
+- Android/Desktop performance: NOT TESTED
 
 ### 14. Android Status
 NOT TESTED — No Android SDK, ADB, Java, or Gradle available.
 
 ### 15. Desktop Status
-NOT TESTED — No .NET or Mono build tools available.
+NOT TESTED — No desktop export toolchain was verified in the environment.
 
 ### 16. Performance Status
 NOT TESTED — No Android device or desktop performance measurement available. GL Compatibility renderer selected for mobile suitability.
 
-### 17. Known Bugs
-- Headless mode produces mesh rendering warnings (non-blocking, rendering-only)
-- Repair station currently triggers repair when shortcut is NOT open (requires shortcut_open check; currently only repair when shortcut_open is true)
-- District.vehicle_health and Vehicle.health are separate variables; may diverge
+### 17. Known Limitations and Unverified Areas
+- Headless mode produces repeated dummy-renderer mesh warnings; these are not treated as gameplay evidence.
+- District.vehicle_health and Vehicle.health are separate variables; synchronization has not been runtime-tested.
+- Repair station behavior requires `shortcut_open`; this path is code-reviewed but not interactively verified.
 
 ### 18. Launch Instructions
 1. Install Godot 4.3+ (standard version, no .NET needed)
@@ -107,18 +96,17 @@ NOT TESTED — No Android device or desktop performance measurement available. G
 7. Best score and time saved locally
 
 ### 20. Exact Build Paths
-No builds produced — no build tools available in environment.
+No builds produced. Android and desktop export verification remain unavailable in the current environment.
 
 ### 21. Recommended Next Milestone
-- Android export and device testing (Milestone 10 continuation)
-- Playtesting all interactive features
-- Audio feedback implementation
-- Tutorial hints
+- Run a graphical Godot editor launch and complete interactive gameplay QA.
+- Package and verify desktop/Android builds only after interactive QA.
+- Then address audio feedback and tutorial hints as separate follow-up work.
 
 ### 22. Honest Limitations
-- No interactive gameplay testing possible in headless environment
-- No Android or Desktop build verification possible
-- No performance benchmarking possible
-- All gameplay features are code-verified but not runtime-tested
-- Repair station logic may have edge cases (repairing when shortcut is closed)
-- Vehicle health tracked separately in district and vehicle scripts
+- No interactive gameplay testing is available in the current headless environment.
+- No Godot graphical editor launch has been verified.
+- No Android or Desktop build verification is available.
+- No performance benchmarking is available.
+- No runtime gameplay claims are made.
+- Release readiness remains NOT READY.
